@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись на отработки</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>📚 Запись на отработки</h1>
+    <p class="subtitle">Выберите преподавателя, дисциплину и удобную дату</p>
+    
+    <!-- Объявления -->
+    <div id="announcements"></div>
+    
+    <!-- Сообщение о загрузке -->
+    <div id="loading" class="loading">Загрузка данных...</div>
+    
+    <!-- Форма -->
+    <form id="registrationForm" style="display:none;">
+        
+        <div class="form-group">
+            <label for="fio">Ваше ФИО</label>
+            <input type="text" id="fio" placeholder="Иванов Иван Иванович" autocomplete="off" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="group">Группа</label>
+            <input type="text" id="group" placeholder="Например: ЛД-301" autocomplete="off" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="topic">Тема отработки</label>
+            <input type="text" id="topic" placeholder="Например: Сердечно-сосудистая система" autocomplete="off" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="teacher">Преподаватель</label>
+            <select id="teacher" required>
+                <option value="">— Выберите —</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="discipline">Дисциплина</label>
+            <select id="discipline" disabled required>
+                <option value="">— Сначала выберите преподавателя —</option>
+            </select>
+        </div>
+        
+        <!-- Информация о преподавателе -->
+        <div id="infoBlock" class="info-box" style="display:none;">
+            <span id="infoText"></span>
+        </div>
+        
+        <!-- Календарь -->
+        <div id="calendarBlock" style="display:none;">
+            <label>Доступные даты</label>
+            <p class="hint">🟢 Свободно | 🔴 Мест нет</p>
+            <div id="calendar"></div>
+        </div>
+        
+        <input type="hidden" id="selectedDate">
+        
+        <button type="submit" id="submitBtn" disabled>
+            Записаться
+        </button>
+        
+    </form>
+    
+    <!-- Сообщение -->
+    <div id="message"></div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
