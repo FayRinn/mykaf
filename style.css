@@ -1,0 +1,303 @@
+/* ============================================
+   ОБЩИЕ СТИЛИ
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+
+h1 {
+    color: #1a73e8;
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* ============================================
+   ОБЪЯВЛЕНИЯ
+   ============================================ */
+
+#announcements {
+    margin-bottom: 16px;
+}
+
+.announcement {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #856404;
+    line-height: 1.4;
+}
+
+/* ============================================
+   ЗАГРУЗКА
+   ============================================ */
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 15px;
+}
+
+/* ============================================
+   ФОРМА
+   ============================================ */
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+    font-size: 14px;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: 0.2s;
+    background: white;
+    font-family: inherit;
+}
+
+input[type="text"]:focus,
+select:focus {
+    border-color: #1a73e8;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+}
+
+input[type="text"]:disabled,
+select:disabled {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+select:disabled {
+    cursor: not-allowed;
+}
+
+/* ============================================
+   ИНФО-БЛОК
+   ============================================ */
+
+.info-box {
+    background: #e8f0fe;
+    border-left: 4px solid #1a73e8;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    margin: 12px 0;
+}
+
+/* ============================================
+   КАЛЕНДАРЬ
+   ============================================ */
+
+#calendarBlock {
+    margin: 16px 0;
+}
+
+.hint {
+    color: #888;
+    font-size: 12px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}
+
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.month-title {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    padding: 10px 0 6px;
+    color: #333;
+}
+
+.calendar-header {
+    text-align: center;
+    font-weight: 600;
+    color: #999;
+    font-size: 11px;
+    padding: 4px 0;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: default;
+    transition: 0.15s;
+    user-select: none;
+}
+
+.calendar-day.empty {
+    background: transparent;
+}
+
+.calendar-day.past {
+    color: #ccc;
+}
+
+.calendar-day.available {
+    background: #e8f5e9;
+    color: #2e7d32;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.calendar-day.available:hover {
+    background: #2e7d32;
+    color: white;
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(46,125,50,0.3);
+}
+
+.calendar-day.full {
+    background: #ffebee;
+    color: #c62828;
+    text-decoration: line-through;
+    cursor: not-allowed;
+    font-weight: 600;
+}
+
+.calendar-day.selected {
+    background: #1a73e8 !important;
+    color: white !important;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(26,115,232,0.4);
+}
+
+/* ============================================
+   КНОПКА
+   ============================================ */
+
+button {
+    width: 100%;
+    padding: 13px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 8px;
+    font-family: inherit;
+}
+
+button:hover:not(:disabled) {
+    background: #1557b0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26,115,232,0.3);
+}
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   СООБЩЕНИЯ
+   ============================================ */
+
+#message {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+    min-height: 20px;
+    line-height: 1.4;
+}
+
+#message.info {
+    background: #e8f0fe;
+    color: #1a73e8;
+}
+
+#message.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+#message.error {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* ============================================
+   МОБИЛЬНАЯ ВЕРСИЯ
+   ============================================ */
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 20px;
+        border-radius: 12px;
+    }
+    
+    h1 {
+        font-size: 20px;
+    }
+    
+    .calendar-day {
+        font-size: 12px;
+    }
+}
