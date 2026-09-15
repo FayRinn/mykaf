@@ -26,6 +26,7 @@ async function loadData() {
     try {
         const response = await fetch(API_URL + '?action=getData');
         
+        // Читаем как текст, чтобы обработать возможный HTML
         const text = await response.text();
         
         let data;
@@ -46,10 +47,14 @@ async function loadData() {
         
         allData = data;
         
+        // Показываем форму
         document.getElementById('loading').style.display = 'none';
         document.getElementById('registrationForm').style.display = 'block';
         
+        // Объявления
         showAnnouncements(data.announcements);
+        
+        // Преподаватели
         populateTeachers();
         
     } catch (err) {
@@ -57,7 +62,9 @@ async function loadData() {
         loadingEl.innerHTML = 
             '❌ ' + err.message + 
             '<br><br>' +
-            '<button onclick="location.reload()" style="padding: 10px 20px; cursor: pointer; background: #1a73e8; color: white; border: none; border-radius: 6px; font-size: 14px;">' +
+            '<button onclick="location.reload()" ' +
+            'style="padding: 10px 20px; cursor: pointer; background: #1a73e8; ' +
+            'color: white; border: none; border-radius: 6px; font-size: 14px;">' +
             '🔄 Обновить страницу' +
             '</button>';
         console.error(err);
@@ -138,7 +145,7 @@ document.getElementById('discipline').addEventListener('change', function() {
         return;
     }
     
-    // Показываем информацию
+    // Информация
     const info = allData.teachers[teacher][discipline];
     const infoBlock = document.getElementById('infoBlock');
     const infoText = document.getElementById('infoText');
@@ -150,7 +157,7 @@ document.getElementById('discipline').addEventListener('change', function() {
     
     infoBlock.style.display = 'block';
     
-    // Рисуем календарь
+    // Календарь
     renderCalendar(teacher, discipline);
 });
 
@@ -189,7 +196,7 @@ function renderCalendar(teacher, discipline) {
     
     schedule.forEach(function(s) {
         const parts = s.date.split('.');
-        const key = parts[2] + '-' + parts[1];  // "2026-09"
+        const key = parts[2] + '-' + parts[1];
         if (!months[key]) months[key] = [];
         months[key].push(s);
     });
@@ -209,31 +216,24 @@ function renderCalendar(teacher, discipline) {
         
         html += '<div class="month-title">' + monthNames[month] + ' ' + year + '</div>';
         
-        // Заголовки дней
         dayNames.forEach(function(d) {
             html += '<div class="calendar-header">' + d + '</div>';
         });
         
-        // Пустые дни в начале месяца
-        // Первый день месяца
         const firstDay = new Date(year, month, 1);
-        // День недели первого дня (0 = Вс, 1 = Пн, ...)
         let firstDayIndex = firstDay.getDay();
-        // Преобразуем в наш формат (0 = Пн)
         firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
         
         for (let i = 0; i < firstDayIndex; i++) {
             html += '<div class="calendar-day empty"></div>';
         }
         
-        // Дни месяца
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = ('0' + day).slice(-2) + '.' + 
                            ('0' + (month + 1)).slice(-2) + '.' + year;
             
-            // Ищем в расписании
             const match = schedule.find(function(s) { return s.date === dateStr; });
             
             if (match) {
@@ -242,18 +242,15 @@ function renderCalendar(teacher, discipline) {
                 const maxCount = match.maxCount;
                 
                 if (count >= maxCount) {
-                    // Мест нет
                     html += '<div class="calendar-day full" title="Мест нет (' + 
                             count + '/' + maxCount + ')">' + day + '</div>';
                 } else {
-                    // Есть места
                     html += '<div class="calendar-day available" ' +
                             'onclick="selectDate(\'' + dateStr + '\', this)" ' +
                             'title="Свободно: ' + (maxCount - count) + ' из ' + maxCount + '">' + 
                             day + '</div>';
                 }
             } else {
-                // Нет в расписании
                 const today = new Date();
                 today.setHours(0,0,0,0);
                 const checkDate = new Date(year, month, day);
@@ -272,25 +269,21 @@ function renderCalendar(teacher, discipline) {
 
 // Выбор даты
 function selectDate(dateStr, element) {
-    // Снимаем выделение
     document.querySelectorAll('.calendar-day.selected').forEach(function(el) {
         el.classList.remove('selected');
     });
     
-    // Выделяем
     element.classList.add('selected');
     
     selectedDate = dateStr;
     document.getElementById('selectedDate').value = dateStr;
     document.getElementById('submitBtn').disabled = false;
     
-    // Показываем информацию
     const teacher = document.getElementById('teacher').value;
     const discipline = document.getElementById('discipline').value;
     const key = dateStr + '|' + teacher + '|' + discipline;
     const count = allData.counts[key] || 0;
     
-    // Находим maxCount
     const match = allData.schedule.find(function(s) {
         return s.date === dateStr && s.teacher === teacher && s.discipline === discipline;
     });
@@ -329,7 +322,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         return;
     }
     
-    // Блокируем кнопку
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.textContent = 'Отправка...';
@@ -348,7 +340,16 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
             })
         });
         
-        const result = await response.json();
+        // Читаем как текст, потом парсим
+        const text = await response.text();
+        
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error('Сервер вернул не JSON:', text.substring(0, 300));
+            throw new Error('Сервер временно недоступен. Попробуйте через минуту.');
+        }
         
         if (result.success) {
             // Обновляем счётчики
@@ -368,7 +369,7 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         }
         
     } catch (err) {
-        showMessage('❌ Ошибка сети: ' + err.message, 'error');
+        showMessage('❌ ' + err.message, 'error');
         btn.disabled = false;
         btn.textContent = 'Записаться';
     }
