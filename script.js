@@ -25,7 +25,20 @@ let selectedDate = null;
 async function loadData() {
     try {
         const response = await fetch(API_URL + '?action=getData');
-        const data = await response.json();
+        
+        const text = await response.text();
+        
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('Сервер вернул не JSON:', text.substring(0, 300));
+            
+            if (text.indexOf('<!DOCTYPE') !== -1 || text.indexOf('<html') !== -1) {
+                throw new Error('Сервер временно недоступен. Подождите минуту и обновите страницу.');
+            }
+            throw new Error('Ошибка сервера. Попробуйте позже.');
+        }
         
         if (data.error) {
             throw new Error(data.error);
@@ -33,19 +46,20 @@ async function loadData() {
         
         allData = data;
         
-        // Скрываем загрузку
         document.getElementById('loading').style.display = 'none';
         document.getElementById('registrationForm').style.display = 'block';
         
-        // Показываем объявления
         showAnnouncements(data.announcements);
-        
-        // Заполняем преподавателей
         populateTeachers();
         
     } catch (err) {
-        document.getElementById('loading').innerHTML = 
-            '❌ Ошибка загрузки: ' + err.message;
+        const loadingEl = document.getElementById('loading');
+        loadingEl.innerHTML = 
+            '❌ ' + err.message + 
+            '<br><br>' +
+            '<button onclick="location.reload()" style="padding: 10px 20px; cursor: pointer; background: #1a73e8; color: white; border: none; border-radius: 6px; font-size: 14px;">' +
+            '🔄 Обновить страницу' +
+            '</button>';
         console.error(err);
     }
 }
