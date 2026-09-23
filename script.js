@@ -2,11 +2,9 @@
 // ============ КОНФИГУРАЦИЯ ==================================
 // ============================================================
 
-
 const API_URL = 'https://script.google.com/macros/s/AKfycbx0N_77aHqiQKpinu70XkEAqM0lHY9BoJ7RfzLaQ-piTkBnGm0EM3Hd0SwfqMQWVD68WQ/exec';
 
-
-// ============ ПЕРЕМЕННЫЕ =========================
+// ============ ПЕРЕМЕННЫЕ ====================================
 
 let allData = {
     teachers: {},
@@ -17,12 +15,14 @@ let allData = {
 
 let selectedDate = null;
 
+// ============================================================
 // ============ ЗАГРУЗКА ДАННЫХ ===============================
+// ============================================================
+
 async function loadData() {
     try {
         const response = await fetch(API_URL + '?action=getData');
         
-        // Читаем как текст, чтобы обработать возможный HTML
         const text = await response.text();
         
         let data;
@@ -43,14 +43,10 @@ async function loadData() {
         
         allData = data;
         
-        // Показать форму
         document.getElementById('loading').style.display = 'none';
         document.getElementById('registrationForm').style.display = 'block';
         
-        // Объявления
         showAnnouncements(data.announcements);
-        
-        // Преподаватели
         populateTeachers();
         
     } catch (err) {
@@ -61,7 +57,7 @@ async function loadData() {
             '<button onclick="location.reload()" ' +
             'style="padding: 10px 20px; cursor: pointer; background: #1a73e8; ' +
             'color: white; border: none; border-radius: 6px; font-size: 14px;">' +
-            ' Обновить страницу' +
+            'Обновить страницу' +
             '</button>';
         console.error(err);
     }
@@ -84,6 +80,9 @@ function showAnnouncements(list) {
     });
 }
 
+// ============================================================
+// ============ ПРЕПОДАВАТЕЛИ =================================
+// ============================================================
 
 function populateTeachers() {
     const select = document.getElementById('teacher');
@@ -138,30 +137,29 @@ document.getElementById('discipline').addEventListener('change', function() {
         return;
     }
     
-    // Информация
     const info = allData.teachers[teacher][discipline];
     const infoBlock = document.getElementById('infoBlock');
     const infoText = document.getElementById('infoText');
     
     infoText.innerHTML = 
-        'Дни приёма: <b>' + info.days.join(', ') + '</b><br>' +
+        '🕐 Дни приёма: <b>' + info.days.join(', ') + '</b><br>' +
         'Время: <b>' + info.time + '</b> | ' +
         'Аудитория: <b>' + info.aud + '</b>';
     
     infoBlock.style.display = 'block';
     
-    // Календарь
     renderCalendar(teacher, discipline);
 });
 
-
+// ============================================================
 // ============ КАЛЕНДАРЬ =====================================
+// ============================================================
 
 function hideCalendar() {
     document.getElementById('calendarBlock').style.display = 'none';
     document.getElementById('infoBlock').style.display = 'none';
     document.getElementById('selectedDate').value = '';
-    document.getElementById('Btn').disabled = true;
+    document.getElementById('submitBtn').disabled = true;
     document.getElementById('message').textContent = '';
     document.getElementById('message').className = '';
     selectedDate = null;
@@ -173,7 +171,6 @@ function renderCalendar(teacher, discipline) {
     
     block.style.display = 'block';
     
-    // Фильтруем расписание
     const schedule = allData.schedule.filter(function(s) {
         return s.teacher === teacher && s.discipline === discipline;
     });
@@ -183,7 +180,6 @@ function renderCalendar(teacher, discipline) {
         return;
     }
     
-    // Группируем по месяцам
     const months = {};
     
     schedule.forEach(function(s) {
@@ -269,7 +265,7 @@ function selectDate(dateStr, element) {
     
     selectedDate = dateStr;
     document.getElementById('selectedDate').value = dateStr;
-    document.getElementById('Btn').disabled = false;
+    document.getElementById('submitBtn').disabled = false;
     
     const teacher = document.getElementById('teacher').value;
     const discipline = document.getElementById('discipline').value;
@@ -281,7 +277,7 @@ function selectDate(dateStr, element) {
     });
     const maxCount = match ? match.maxCount : 10;
     
-    showMessage(' Выбрано: ' + dateStr + ' (' + count + '/' + maxCount + ')', 'info');
+    showMessage('📅 Выбрано: ' + dateStr + ' (' + count + '/' + maxCount + ')', 'info');
 }
 
 // ============================================================
@@ -320,7 +316,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     
     showMessage('⏳ Отправляем запись... Не закрывайте страницу', 'info');
     
-    // Запоминаем текущее количество записей
     const key = date + '|' + teacher + '|' + discipline;
     const prevCount = allData.counts[key] || 0;
     
@@ -344,7 +339,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         try {
             result = JSON.parse(text);
         } catch (e) {
-            // Ответ не JSON — но запись могла быть создана
             throw new Error('JSON_PARSE_ERROR');
         }
         
@@ -365,7 +359,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     } catch (err) {
         console.error('Ошибка при отправке:', err);
         
-        // ⚠️ Даже при ошибке — запись может быть создана
         showMessage(
             '⏳ Запись отправлена. Проверяем статус через 10 секунд...', 
             'info'
@@ -374,14 +367,12 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         btn.textContent = 'Проверка...';
         btn.disabled = true;
         
-        // ⚠️ Автопроверка через 10 секунд
         setTimeout(async function() {
             try {
                 const checkResponse = await fetch(API_URL + '?action=getData');
                 const checkText = await checkResponse.text();
                 const checkData = JSON.parse(checkText);
                 
-                // Обновляем данные
                 allData = checkData;
                 
                 const newCount = allData.counts[key] || 0;
@@ -390,7 +381,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
                 )?.maxCount || 10;
                 
                 if (newCount > prevCount) {
-                    // ✅ Запись появилась
                     showMessage(
                         '✅ Запись сохранена! Записано: ' + newCount + '/' + maxCount,
                         'success'
@@ -399,7 +389,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
                     btn.disabled = true;
                     renderCalendar(teacher, discipline);
                 } else {
-                    // Не удалось проверить — предлагаем обновить
                     showMessage(
                         '⏳ Не удалось проверить автоматически. ' +
                         'Нажмите «Обновить», чтобы проверить статус.',
@@ -411,7 +400,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
                 }
                 
             } catch (checkErr) {
-                // Не удалось проверить
                 showMessage(
                     '⏳ Запись отправлена. ' +
                     'Нажмите «Обновить», чтобы проверить статус.',
