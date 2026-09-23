@@ -2,12 +2,11 @@
 // ============ КОНФИГУРАЦИЯ ==================================
 // ============================================================
 
-// ⚠️ ЗАМЕНИТЕ НА ВАШ URL WEB APP!
+
 const API_URL = 'https://script.google.com/macros/s/AKfycbx0N_77aHqiQKpinu70XkEAqM0lHY9BoJ7RfzLaQ-piTkBnGm0EM3Hd0SwfqMQWVD68WQ/exec';
 
-// ============================================================
-// ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =========================
-// ============================================================
+
+// ============ ПЕРЕМЕННЫЕ =========================
 
 let allData = {
     teachers: {},
@@ -18,10 +17,7 @@ let allData = {
 
 let selectedDate = null;
 
-// ============================================================
 // ============ ЗАГРУЗКА ДАННЫХ ===============================
-// ============================================================
-
 async function loadData() {
     try {
         const response = await fetch(API_URL + '?action=getData');
@@ -47,7 +43,7 @@ async function loadData() {
         
         allData = data;
         
-        // Показываем форму
+        // Показать форму
         document.getElementById('loading').style.display = 'none';
         document.getElementById('registrationForm').style.display = 'block';
         
@@ -65,7 +61,7 @@ async function loadData() {
             '<button onclick="location.reload()" ' +
             'style="padding: 10px 20px; cursor: pointer; background: #1a73e8; ' +
             'color: white; border: none; border-radius: 6px; font-size: 14px;">' +
-            '🔄 Обновить страницу' +
+            ' Обновить страницу' +
             '</button>';
         console.error(err);
     }
@@ -88,9 +84,6 @@ function showAnnouncements(list) {
     });
 }
 
-// ============================================================
-// ============ ПРЕПОДАВАТЕЛИ =================================
-// ============================================================
 
 function populateTeachers() {
     const select = document.getElementById('teacher');
@@ -151,7 +144,7 @@ document.getElementById('discipline').addEventListener('change', function() {
     const infoText = document.getElementById('infoText');
     
     infoText.innerHTML = 
-        '🕐 Дни приёма: <b>' + info.days.join(', ') + '</b><br>' +
+        'Дни приёма: <b>' + info.days.join(', ') + '</b><br>' +
         'Время: <b>' + info.time + '</b> | ' +
         'Аудитория: <b>' + info.aud + '</b>';
     
@@ -161,9 +154,8 @@ document.getElementById('discipline').addEventListener('change', function() {
     renderCalendar(teacher, discipline);
 });
 
-// ============================================================
+
 // ============ КАЛЕНДАРЬ =====================================
-// ============================================================
 
 function hideCalendar() {
     document.getElementById('calendarBlock').style.display = 'none';
@@ -289,7 +281,7 @@ function selectDate(dateStr, element) {
     });
     const maxCount = match ? match.maxCount : 10;
     
-    showMessage('📅 Выбрано: ' + dateStr + ' (' + count + '/' + maxCount + ')', 'info');
+    showMessage(' Выбрано: ' + dateStr + ' (' + count + '/' + maxCount + ')', 'info');
 }
 
 // ============================================================
