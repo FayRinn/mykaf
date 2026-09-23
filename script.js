@@ -161,7 +161,7 @@ function hideCalendar() {
     document.getElementById('calendarBlock').style.display = 'none';
     document.getElementById('infoBlock').style.display = 'none';
     document.getElementById('selectedDate').value = '';
-    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('Btn').disabled = true;
     document.getElementById('message').textContent = '';
     document.getElementById('message').className = '';
     selectedDate = null;
@@ -269,7 +269,7 @@ function selectDate(dateStr, element) {
     
     selectedDate = dateStr;
     document.getElementById('selectedDate').value = dateStr;
-    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('Btn').disabled = false;
     
     const teacher = document.getElementById('teacher').value;
     const discipline = document.getElementById('discipline').value;
@@ -318,6 +318,12 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     btn.disabled = true;
     btn.textContent = 'Отправка...';
     
+    showMessage('⏳ Отправляем запись... Не закрывайте страницу', 'info');
+    
+    // Запоминаем текущее количество записей
+    const key = date + '|' + teacher + '|' + discipline;
+    const prevCount = allData.counts[key] || 0;
+    
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -332,28 +338,24 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
             })
         });
         
-        // Читаем как текст, потом парсим
         const text = await response.text();
         
         let result;
         try {
             result = JSON.parse(text);
         } catch (e) {
-            console.error('Сервер вернул не JSON:', text.substring(0, 300));
-            throw new Error('Сервер временно недоступен. Попробуйте через минуту.');
+            // Ответ не JSON — но запись могла быть создана
+            throw new Error('JSON_PARSE_ERROR');
         }
         
         if (result.success) {
-            // Обновляем счётчики
-            const key = date + '|' + teacher + '|' + discipline;
             allData.counts[key] = (allData.counts[key] || 0) + 1;
-            
             showMessage('✅ ' + result.message, 'success');
             btn.textContent = 'Готово ✓';
-            
-            // Перерисовываем календарь
             renderCalendar(teacher, discipline);
-            
+        } else if (result.duplicate) {
+            showMessage('✅ Вы уже записаны на эту дату', 'success');
+            btn.textContent = 'Готово ✓';
         } else {
             showMessage('❌ ' + result.error, 'error');
             btn.disabled = false;
@@ -361,9 +363,65 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         }
         
     } catch (err) {
-        showMessage('❌ ' + err.message, 'error');
-        btn.disabled = false;
-        btn.textContent = 'Записаться';
+        console.error('Ошибка при отправке:', err);
+        
+        // ⚠️ Даже при ошибке — запись может быть создана
+        showMessage(
+            '⏳ Запись отправлена. Проверяем статус через 10 секунд...', 
+            'info'
+        );
+        
+        btn.textContent = 'Проверка...';
+        btn.disabled = true;
+        
+        // ⚠️ Автопроверка через 10 секунд
+        setTimeout(async function() {
+            try {
+                const checkResponse = await fetch(API_URL + '?action=getData');
+                const checkText = await checkResponse.text();
+                const checkData = JSON.parse(checkText);
+                
+                // Обновляем данные
+                allData = checkData;
+                
+                const newCount = allData.counts[key] || 0;
+                const maxCount = allData.schedule.find(
+                    s => s.date === date && s.teacher === teacher && s.discipline === discipline
+                )?.maxCount || 10;
+                
+                if (newCount > prevCount) {
+                    // ✅ Запись появилась
+                    showMessage(
+                        '✅ Запись сохранена! Записано: ' + newCount + '/' + maxCount,
+                        'success'
+                    );
+                    btn.textContent = 'Готово ✓';
+                    btn.disabled = true;
+                    renderCalendar(teacher, discipline);
+                } else {
+                    // Не удалось проверить — предлагаем обновить
+                    showMessage(
+                        '⏳ Не удалось проверить автоматически. ' +
+                        'Нажмите «Обновить», чтобы проверить статус.',
+                        'info'
+                    );
+                    btn.textContent = 'Обновить';
+                    btn.disabled = false;
+                    btn.onclick = function() { location.reload(); };
+                }
+                
+            } catch (checkErr) {
+                // Не удалось проверить
+                showMessage(
+                    '⏳ Запись отправлена. ' +
+                    'Нажмите «Обновить», чтобы проверить статус.',
+                    'info'
+                );
+                btn.textContent = 'Обновить';
+                btn.disabled = false;
+                btn.onclick = function() { location.reload(); };
+            }
+        }, 10000);
     }
 });
 
